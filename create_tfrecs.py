@@ -5,6 +5,7 @@ from imutils import paths
 from tfrecord_utils import write_tfrecords
 from tfrecord_utils import load_images, compute_nshards
 
+
 # construct the argument parser
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--dataset", required=True,
@@ -24,8 +25,9 @@ class_names = [path for path in dir_items if not path.startswith(".")]
 class_map = {class_: id_ for id_, class_ in enumerate(class_names)}
 
 # create tensorflow dataset
+AUTOTUNE = tf.data.experimental.AUTOTUNE
 dataset = tf.data.Dataset.from_tensor_slices(image_paths)
-dataset = dataset.map(load_images)
+dataset = dataset.map(load_images, num_parallel_calls=AUTOTUNE)
 
 # write to tfrecord files
 if args['n_shards'] == 'auto':
