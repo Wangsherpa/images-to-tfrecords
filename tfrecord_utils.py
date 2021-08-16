@@ -32,21 +32,27 @@ def create_example(image, label, class_map):
         )
     )
 
-def write_tfrecords(name, dataset, n_shards=10, class_map=None):
+def write_tfrecords(savepath, dataset, prefix, n_shards=10, class_map=None):
     """
     This function saves a given dataset to a set of TFRecord files.
     
     Args:
-            name (string) path to save target files along with initial name
+            savepath (string) path to save target files
             dataset (tf.data) tensorflow dataset
+            prefix (string) filename prefix
             n_shards (int) total number of tfrecord files to create
             class_map (dict) contains class IDs
     
     Returns:
             list: list of new tfrecord file paths
     """
-    paths = ["{}.tfrecord-{:05d}-of-{:05d}".format(name, index+1,
-             n_shards) for index in range(n_shards)]
+    # if directory doesn't exists then create a new dir
+    if not os.path.exists(savepath):
+        os.mkdir(savepath)
+    # append prefix with directory
+    save_path = savepath +'/' + prefix
+    paths = ["{}-{}.tfrecord".format(save_path, index+1)
+             for index in range(n_shards)]
     with ExitStack() as stack:
         writers = [stack.enter_context(tf.io.TFRecordWriter(path))
                    for path in paths]
